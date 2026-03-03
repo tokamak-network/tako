@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useGovernance } from "@/providers/governance/GovernanceProvider";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { StatusBadge } from "@/components/ui/badge";
+import { StatusBadge, GovernanceSystemBadge } from "@/components/ui/badge";
 import { VotingProgress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Modal, ModalBody, ModalFooter } from "@/components/ui/modal";
@@ -141,6 +141,7 @@ export default function ProposalDetailPage() {
           <div className="flex items-center gap-3 mb-2">
             <span className="text-sm text-[var(--text-tertiary)]">Proposal #{proposal.id}</span>
             <StatusBadge status={proposal.status} />
+            <GovernanceSystemBadge system={proposal.governanceSystem} />
           </div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{proposal.title}</h1>
           <div className="flex items-center gap-3 mt-2">
@@ -223,6 +224,32 @@ export default function ProposalDetailPage() {
                     <span className="text-[var(--text-secondary)]">{formatDate(proposal.eta * 1000)}</span>
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Governance System */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Governance System</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[var(--text-tertiary)]">System</span>
+                  <GovernanceSystemBadge system={proposal.governanceSystem} size="sm" />
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--text-tertiary)]">Mechanism</span>
+                  <span className="text-[var(--text-secondary)]">
+                    {proposal.governanceSystem === "v1" ? "Committee Vote" : "Token Vote"}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--text-tertiary)] pt-2 border-t border-[var(--border-secondary)]">
+                  {proposal.governanceSystem === "v1"
+                    ? "V1 DAOCommittee — 3-member committee vote (2/3 quorum). Migration agenda executed through v1."
+                    : "V2 DAOGovernor — vTON token-weighted vote with 4% quorum and 7-day timelock."}
+                </p>
               </div>
             </CardContent>
           </Card>

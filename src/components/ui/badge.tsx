@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import type { ProposalStatus } from "../../../shared/types";
+import type { ProposalStatus, GovernanceSystem } from "../../../shared/types";
 
 const badgeVariants = cva(
   [
@@ -79,4 +79,30 @@ const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
 );
 StatusBadge.displayName = "StatusBadge";
 
-export { Badge, StatusBadge, badgeVariants };
+const governanceSystemConfig: Record<GovernanceSystem, { variant: NonNullable<BadgeProps["variant"]>; label: string }> = {
+  v1: { variant: "outline", label: "V1" },
+  v2: { variant: "primary", label: "V2" },
+};
+
+export interface GovernanceSystemBadgeProps extends Omit<BadgeProps, "variant"> {
+  system: GovernanceSystem;
+}
+
+const GovernanceSystemBadge = React.forwardRef<HTMLSpanElement, GovernanceSystemBadgeProps>(
+  ({ system, className, ...props }, ref) => {
+    const config = governanceSystemConfig[system];
+    return (
+      <Badge
+        ref={ref}
+        variant={config.variant}
+        className={cn("uppercase tracking-[var(--letter-spacing-wide)]", className)}
+        {...props}
+      >
+        {config.label}
+      </Badge>
+    );
+  }
+);
+GovernanceSystemBadge.displayName = "GovernanceSystemBadge";
+
+export { Badge, StatusBadge, GovernanceSystemBadge, badgeVariants };

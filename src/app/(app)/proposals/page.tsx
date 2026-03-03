@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useGovernance } from "@/providers/governance/GovernanceProvider";
 import { Card } from "@/components/ui/card";
-import { StatusBadge } from "@/components/ui/badge";
+import { StatusBadge, GovernanceSystemBadge } from "@/components/ui/badge";
 import { VotingProgress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { formatAddress, formatDate } from "@/lib/utils";
@@ -61,6 +61,7 @@ export default function ProposalsPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs text-[var(--text-tertiary)]">#{p.id}</span>
                       <StatusBadge status={p.status} size="sm" />
+                      <GovernanceSystemBadge system={p.governanceSystem} size="sm" />
                     </div>
                     <h3 className="text-base font-semibold text-[var(--text-primary)] truncate-2">
                       {p.title}

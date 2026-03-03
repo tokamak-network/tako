@@ -62,8 +62,8 @@ export function GovernanceProvider({ children }: { children: React.ReactNode }) 
         ? proposals.filter((p) => p.status === filter)
         : proposals;
       const list: ProposalListItem[] = filtered.map(
-        ({ id, title, status, proposer, forVotes, againstVotes, abstainVotes, startTime, endTime }) => ({
-          id, title, status, proposer, forVotes, againstVotes, abstainVotes, startTime, endTime,
+        ({ id, title, status, governanceSystem, proposer, forVotes, againstVotes, abstainVotes, startTime, endTime }) => ({
+          id, title, status, governanceSystem, proposer, forVotes, againstVotes, abstainVotes, startTime, endTime,
         })
       );
       // eslint-disable-next-line react-hooks/rules-of-hooks

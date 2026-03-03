@@ -4,6 +4,8 @@
  * NOTE: proposal ID is string to avoid bigint serialization issues
  */
 
+export type GovernanceSystem = "v1" | "v2";
+
 export type ProposalStatus =
   | "active"
   | "pending"
@@ -52,6 +54,7 @@ export interface Proposal {
   title: string;
   description: string;
   status: ProposalStatus;
+  governanceSystem: GovernanceSystem;
   forVotes: number;
   againstVotes: number;
   abstainVotes: number;
@@ -66,6 +69,7 @@ export interface ProposalListItem {
   id: string;
   title: string;
   status: ProposalStatus;
+  governanceSystem: GovernanceSystem;
   proposer: string;
   forVotes: number;
   againstVotes: number;

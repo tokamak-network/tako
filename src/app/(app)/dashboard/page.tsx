@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useGovernance } from "@/providers/governance/GovernanceProvider";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { StatusBadge } from "@/components/ui/badge";
+import { StatusBadge, GovernanceSystemBadge } from "@/components/ui/badge";
 import { VotingProgress } from "@/components/ui/progress";
 import { AddressAvatar } from "@/components/ui/avatar";
 import { formatNumber, formatAddress } from "@/lib/utils";
@@ -64,7 +64,10 @@ function ActiveProposals() {
                   <span className="text-sm font-medium text-[var(--text-primary)] truncate pr-4">
                     {p.title}
                   </span>
-                  <StatusBadge status={p.status} size="sm" />
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <StatusBadge status={p.status} size="sm" />
+                    <GovernanceSystemBadge system={p.governanceSystem} size="sm" />
+                  </div>
                 </div>
                 <VotingProgress
                   forVotes={p.forVotes}

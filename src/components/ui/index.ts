@@ -4,8 +4,8 @@ export type { ButtonProps } from "./button";
 export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, cardVariants } from "./card";
 export type { CardProps } from "./card";
 
-export { Badge, StatusBadge, badgeVariants } from "./badge";
-export type { BadgeProps, StatusBadgeProps } from "./badge";
+export { Badge, StatusBadge, GovernanceSystemBadge, badgeVariants } from "./badge";
+export type { BadgeProps, StatusBadgeProps, GovernanceSystemBadgeProps } from "./badge";
 
 export { Input, Textarea, inputVariants } from "./input";
 export type { InputProps } from "./input";
