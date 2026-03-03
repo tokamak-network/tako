@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/workspace/toki/**)",
+      "Read(~/workspace/tokamak-dao-v2/**)",
+      "Read(~/workspace/tokamak-dao-agent/**)",
+      "Bash(npm run dev)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm install *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  }
+}
