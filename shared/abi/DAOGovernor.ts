@@ -124,6 +124,41 @@ export const DAO_GOVERNOR_ABI = [
     ],
     outputs: [{ name: "", type: "uint256" }],
   },
+  // Proposal lifecycle
+  {
+    name: "propose",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "targets", type: "address[]" },
+      { name: "values", type: "uint256[]" },
+      { name: "calldatas", type: "bytes[]" },
+      { name: "description", type: "string" },
+      { name: "burnRate", type: "uint16" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    name: "queue",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    name: "execute",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    name: "cancel",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [],
+  },
   // Events
   {
     name: "ProposalCreated",
@@ -150,6 +185,28 @@ export const DAO_GOVERNOR_ABI = [
       { name: "support", type: "uint8", indexed: false },
       { name: "weight", type: "uint256", indexed: false },
       { name: "reason", type: "string", indexed: false },
+    ],
+  },
+  {
+    name: "ProposalQueued",
+    type: "event",
+    inputs: [
+      { name: "proposalId", type: "uint256", indexed: true },
+      { name: "eta", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    name: "ProposalExecuted",
+    type: "event",
+    inputs: [
+      { name: "proposalId", type: "uint256", indexed: true },
+    ],
+  },
+  {
+    name: "ProposalCanceled",
+    type: "event",
+    inputs: [
+      { name: "proposalId", type: "uint256", indexed: true },
     ],
   },
 ] as const;

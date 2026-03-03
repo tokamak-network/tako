@@ -61,7 +61,25 @@ export const DELEGATE_REGISTRY_ABI = [
     inputs: [{ name: "account", type: "address" }],
     outputs: [{ name: "", type: "bool" }],
   },
+  {
+    name: "totalDelegated",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
   // Write functions
+  {
+    name: "registerDelegate",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "profile", type: "string" },
+      { name: "votingPhilosophy", type: "string" },
+      { name: "interests", type: "string" },
+    ],
+    outputs: [],
+  },
   {
     name: "delegate",
     type: "function",

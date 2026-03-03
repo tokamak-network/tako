@@ -119,3 +119,93 @@ export interface DashboardMetrics {
   treasuryBalance: number;
   participationRate: number; // percentage
 }
+
+// --- Proposal calldata (decoded by agent) ---
+
+export interface ProposalCalldata {
+  targets: string[];
+  values: string[];
+  calldatas: string[];
+}
+
+// --- Delegate vote record ---
+
+export interface DelegateVoteRecord {
+  proposalId: string;
+  voter: string;
+  support: VoteType;
+  weight: number;
+  reason: string;
+  blockNumber: number;
+}
+
+// --- Delegate profile (Supabase off-chain) ---
+
+export interface DelegateProfile {
+  address: string;
+  name?: string;
+  avatar?: string;
+  bio?: string;
+  twitter?: string;
+  discord?: string;
+  website?: string;
+  updatedAt?: string;
+}
+
+// --- Forum types (from dao-agent) ---
+
+export type ForumAgendaStatus = "draft" | "rfc" | "snapshot" | "review" | "onchain" | "executed" | "rejected" | "withdrawn";
+
+export interface ForumAgendaListItem {
+  id: number;
+  tipNumber: string;
+  title: string;
+  status: ForumAgendaStatus;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
+  commentCount: number;
+  opinionCount: number;
+}
+
+export interface ForumAgenda extends ForumAgendaListItem {
+  abstract: string;
+  motivation: string;
+  specification: string;
+  rationale: string;
+  securityConsiderations: string;
+  expectedOutcomes: string;
+  proposalId?: string;
+  onchainProposalId?: string;
+}
+
+export interface ForumComment {
+  id: number;
+  agendaId: number;
+  author: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Security Council types ---
+
+export enum ActionType {
+  CancelProposal = 0,
+  PauseProtocol = 1,
+  UnpauseProtocol = 2,
+  EmergencyUpgrade = 3,
+}
+
+export interface EmergencyAction {
+  id: number;
+  actionType: ActionType;
+  target: string;
+  data: string;
+  proposer: string;
+  reason: string;
+  approvalCount: number;
+  executed: boolean;
+  canceled: boolean;
+  createdAt: number;
+}

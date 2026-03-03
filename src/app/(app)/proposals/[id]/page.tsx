@@ -12,10 +12,13 @@ import { Modal, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/input";
 import { AddressAvatar } from "@/components/ui/avatar";
 import { ProposalAnalysisPanel } from "@/components/proposals/ProposalAnalysisPanel";
+import { ProposalActions } from "@/components/proposals/ProposalActions";
 import { useCharacter } from "@/providers/character/CharacterProvider";
 import { useChat } from "@/providers/chat/context";
 import { formatAddress, formatDate, formatNumber } from "@/lib/utils";
 import { VoteType } from "../../../../../shared/types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const VOTE_OPTIONS = [
   { type: VoteType.For, label: "For", color: "text-[var(--color-vote-for)]", bg: "bg-[var(--color-vote-for)]" },
@@ -167,8 +170,10 @@ export default function ProposalDetailPage() {
               <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="proposal-prose whitespace-pre-wrap">
-                {proposal.description}
+              <div className="proposal-prose">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {proposal.description}
+                </ReactMarkdown>
               </div>
             </CardContent>
           </Card>
@@ -253,6 +258,9 @@ export default function ProposalDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Proposal lifecycle actions */}
+          <ProposalActions proposal={proposal} />
 
           {/* AI Analysis */}
           <ProposalAnalysisPanel proposal={proposal} />

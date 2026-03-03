@@ -22,29 +22,19 @@ import { dummyUserStatus } from "@/data/dummy/user";
 import { dummyDAOParameters, dummyDashboardMetrics } from "@/data/dummy/parameters";
 
 // --- Dummy query helper ---
+// Simulates loading on mount only; after that, passes data through directly.
 function useDummyQuery<T>(data: T, delay = 800): QueryResult<T> {
-  const [state, setState] = useState<{ data: T | undefined; isLoading: boolean }>({
-    data: undefined,
-    isLoading: true,
-  });
-  const mounted = useRef(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    mounted.current = true;
-    setState({ data: undefined, isLoading: true });
-    const timer = setTimeout(() => {
-      if (mounted.current) {
-        setState({ data, isLoading: false });
-      }
-    }, delay);
-    return () => {
-      mounted.current = false;
-      clearTimeout(timer);
-    };
-  }, [data, delay]);
+    const timer = setTimeout(() => setIsLoading(false), delay);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount only — delay is constant per call site
 
   return {
-    ...state,
+    data: isLoading ? undefined : data,
+    isLoading,
     isError: false,
     error: null,
   };
@@ -137,6 +127,31 @@ export function GovernanceProvider({ children }: { children: React.ReactNode }) 
       );
 
       return { castVote, isLoading };
+    },
+
+    useProposalCalldata(_id: string) {
+      // Dummy data — targets/values/calldatas
+      const dummy = {
+        targets: ["0x0b55a0f463b6defb81c6063973763951712d0e5f"],
+        values: ["0"],
+        calldatas: ["0x"],
+      };
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      return useDummyQuery(dummy, 400);
+    },
+
+    useDelegateVotes(address: string) {
+      // Dummy delegate vote records
+      const dummy = proposals.slice(0, 3).map((p, i) => ({
+        proposalId: p.id,
+        voter: address,
+        support: (i % 3) as 0 | 1 | 2,
+        weight: 1000 + i * 500,
+        reason: i === 0 ? "Good proposal" : "",
+        blockNumber: 1000000 + i * 100,
+      }));
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      return useDummyQuery(dummy, 500);
     },
 
     useDelegation() {

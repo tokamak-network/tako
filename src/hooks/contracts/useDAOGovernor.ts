@@ -345,3 +345,146 @@ export function useCastVote() {
     isLoading: isPending || isConfirming,
   };
 }
+
+/**
+ * Hook to create a new proposal.
+ */
+export function usePropose() {
+  const { addresses, isDeployed } = useContracts();
+
+  const { data: hash, isPending, writeContract, error, reset } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+
+  const propose = (
+    targets: string[],
+    values: bigint[],
+    calldatas: string[],
+    description: string,
+    burnRate: number
+  ) => {
+    if (!isDeployed) throw new Error("Contracts not deployed");
+    writeContract({
+      address: addresses.daoGovernor as `0x${string}`,
+      abi: DAO_GOVERNOR_ABI,
+      functionName: "propose",
+      args: [
+        targets as `0x${string}`[],
+        values,
+        calldatas as `0x${string}`[],
+        description,
+        burnRate,
+      ],
+    });
+  };
+
+  return { propose, hash, isPending, isConfirming, isConfirmed, error, reset, isLoading: isPending || isConfirming };
+}
+
+/**
+ * Hook to queue a succeeded proposal.
+ */
+export function useQueueProposal() {
+  const { addresses, isDeployed } = useContracts();
+
+  const { data: hash, isPending, writeContract, error, reset } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+
+  const queue = (proposalId: string) => {
+    if (!isDeployed) throw new Error("Contracts not deployed");
+    writeContract({
+      address: addresses.daoGovernor as `0x${string}`,
+      abi: DAO_GOVERNOR_ABI,
+      functionName: "queue",
+      args: [BigInt(proposalId)],
+    });
+  };
+
+  return { queue, hash, isPending, isConfirming, isConfirmed, error, reset, isLoading: isPending || isConfirming };
+}
+
+/**
+ * Hook to execute a queued proposal after eta.
+ */
+export function useExecuteProposal() {
+  const { addresses, isDeployed } = useContracts();
+
+  const { data: hash, isPending, writeContract, error, reset } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+
+  const execute = (proposalId: string) => {
+    if (!isDeployed) throw new Error("Contracts not deployed");
+    writeContract({
+      address: addresses.daoGovernor as `0x${string}`,
+      abi: DAO_GOVERNOR_ABI,
+      functionName: "execute",
+      args: [BigInt(proposalId)],
+    });
+  };
+
+  return { execute, hash, isPending, isConfirming, isConfirmed, error, reset, isLoading: isPending || isConfirming };
+}
+
+/**
+ * Hook to cancel a proposal (proposer only).
+ */
+export function useCancelProposal() {
+  const { addresses, isDeployed } = useContracts();
+
+  const { data: hash, isPending, writeContract, error, reset } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+
+  const cancel = (proposalId: string) => {
+    if (!isDeployed) throw new Error("Contracts not deployed");
+    writeContract({
+      address: addresses.daoGovernor as `0x${string}`,
+      abi: DAO_GOVERNOR_ABI,
+      functionName: "cancel",
+      args: [BigInt(proposalId)],
+    });
+  };
+
+  return { cancel, hash, isPending, isConfirming, isConfirmed, error, reset, isLoading: isPending || isConfirming };
+}
+
+/**
+ * Hook to get proposal ETA (timelock execution timestamp).
+ */
+export function useProposalEta(proposalId: string) {
+  const { addresses, isDeployed } = useContracts();
+
+  const result = useReadContract({
+    address: addresses.daoGovernor as `0x${string}`,
+    abi: DAO_GOVERNOR_ABI,
+    functionName: "proposalEta",
+    args: [BigInt(proposalId)],
+    query: { enabled: isDeployed },
+  });
+
+  return {
+    data: result.data != null ? Number(result.data as bigint) : undefined,
+    isLoading: isDeployed ? result.isLoading : false,
+  };
+}
+
+/**
+ * Hook to get proposal threshold (min vTON to create proposal).
+ */
+export function useProposalThreshold() {
+  const { addresses, isDeployed } = useContracts();
+
+  const result = useReadContract({
+    address: addresses.daoGovernor as `0x${string}`,
+    abi: DAO_GOVERNOR_ABI,
+    functionName: "proposalThreshold",
+    query: { enabled: isDeployed },
+  });
+
+  return {
+    data: result.data != null ? formatUnits18(result.data as bigint) : undefined,
+    isLoading: isDeployed ? result.isLoading : false,
+  };
+}

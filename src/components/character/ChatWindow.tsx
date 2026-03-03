@@ -12,6 +12,8 @@ import { MoodImage } from "./MoodImage";
 const MODE_LABELS: Record<string, string> = {
   chat: "Chat",
   analyze_proposal: "Proposal Analysis",
+  make_proposal: "Proposal Creation",
+  forum_proposal: "RFC Drafting",
 };
 
 export function ChatWindow() {
@@ -22,8 +24,15 @@ export function ChatWindow() {
 
   // Auto-switch mode based on route
   useEffect(() => {
-    const isProposalDetail = /^\/proposals\/[^/]+$/.test(pathname);
-    setMode(isProposalDetail ? "analyze_proposal" : "chat");
+    if (/^\/proposals\/[^/]+$/.test(pathname) && pathname !== "/proposals/create") {
+      setMode("analyze_proposal");
+    } else if (pathname === "/proposals/create") {
+      setMode("make_proposal");
+    } else if (pathname === "/forum/create") {
+      setMode("forum_proposal");
+    } else {
+      setMode("chat");
+    }
   }, [pathname, setMode]);
 
   // Auto-scroll on new messages
@@ -112,7 +121,12 @@ export function ChatWindow() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={mode === "analyze_proposal" ? "Ask about this proposal..." : "Ask about governance..."}
+            placeholder={
+              mode === "analyze_proposal" ? "Ask about this proposal..." :
+              mode === "make_proposal" ? "Describe what you want to change..." :
+              mode === "forum_proposal" ? "Describe your RFC idea..." :
+              "Ask about governance..."
+            }
             disabled={isLoading}
             className={cn(
               "flex-1 h-9 px-3 text-sm",

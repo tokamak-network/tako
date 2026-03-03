@@ -3,7 +3,7 @@
  * Matches dao-agent server SSE events
  */
 
-export type AgentMode = "chat" | "analyze_proposal";
+export type AgentMode = "chat" | "analyze_proposal" | "make_proposal" | "forum_proposal";
 
 export type ChatSSEEvent =
   | { type: "text_delta"; content: string }

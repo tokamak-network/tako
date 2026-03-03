@@ -2,7 +2,9 @@ import type {
   Proposal,
   ProposalListItem,
   ProposalStatus,
+  ProposalCalldata,
   DelegateInfo,
+  DelegateVoteRecord,
   UserStatus,
   DAOParameters,
   DashboardMetrics,
@@ -45,4 +47,7 @@ export interface GovernanceDataProvider {
     undelegate: () => Promise<void>;
     isLoading: boolean;
   };
+  // Extended (optional — not all providers implement these)
+  useProposalCalldata?(id: string): QueryResult<ProposalCalldata>;
+  useDelegateVotes?(address: string): QueryResult<DelegateVoteRecord[]>;
 }

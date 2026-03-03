@@ -29,3 +29,11 @@ export {
   NavigationItem,
   NavigationActions,
 } from "./navigation";
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
+
+export { Select, selectVariants } from "./select";
+export type { SelectProps } from "./select";
+
+export { MobileNav } from "./mobile-nav";
+export type { MobileNavProps, NavItem, NavItemChild } from "./mobile-nav";

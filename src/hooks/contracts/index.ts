@@ -7,8 +7,17 @@ export {
   useGovernanceParams,
   useHasVoted,
   useCastVote,
+  usePropose,
+  useQueueProposal,
+  useExecuteProposal,
+  useCancelProposal,
+  useProposalEta,
+  useProposalThreshold,
 } from "./useDAOGovernor";
 export {
+  useTotalDelegated,
+  useIsRegisteredDelegate,
+  useRegisterDelegate,
   useAllDelegates,
   useDelegateInfo as useOnChainDelegateInfo,
   useDelegates as useOnChainDelegates,
@@ -17,3 +26,15 @@ export {
   useUndelegate,
 } from "./useDelegateRegistry";
 export { useTimelockDelay } from "./useTimelock";
+export { useTONBalance, useTONAllowance, useApproveTON, useTONFaucetClaim } from "./useTON";
+export { useVTONFaucetConfig, useVTONFaucetClaim } from "./useVTONFaucet";
+export {
+  useSecurityCouncilMembers,
+  useSecurityCouncilThreshold,
+  useIsSCMember,
+  usePendingActions,
+  useProposeEmergencyAction,
+  useApproveAction,
+  useExecuteAction,
+} from "./useSecurityCouncil";
+export { useDelegateVotingHistory } from "./useDelegateVotingHistory";

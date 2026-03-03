@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useAccount } from "wagmi";
 import { useGovernance } from "@/providers/governance/GovernanceProvider";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AddressAvatar } from "@/components/ui/avatar";
@@ -8,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Progress } from "@/components/ui/progress";
+import { DelegateRegistrationModal } from "@/components/delegates/DelegateRegistrationModal";
+import { useIsRegisteredDelegate } from "@/hooks/contracts";
 import { formatNumber, formatAddress } from "@/lib/utils";
 import type { DelegateInfo } from "../../../../shared/types";
 
@@ -105,9 +109,9 @@ function DelegateCard({
         <AddressAvatar address={delegate.address} size="lg" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-[var(--text-primary)] truncate">
+            <Link href={`/delegates/${delegate.address}`} className="font-semibold text-[var(--text-primary)] truncate hover:text-[var(--text-brand)]">
               {delegate.name || formatAddress(delegate.address)}
-            </h3>
+            </Link>
             {isCurrentDelegate && <Badge variant="primary" size="sm">Your Delegate</Badge>}
           </div>
           <p className="text-sm text-[var(--text-tertiary)] mt-0.5">
@@ -140,8 +144,11 @@ export default function DelegatesPage() {
   const { useDelegates, useUserStatus } = useGovernance();
   const { data: delegates, isLoading } = useDelegates();
   const { data: userStatus } = useUserStatus();
+  const { address } = useAccount();
+  const { data: isRegistered } = useIsRegisteredDelegate();
   const [selectedDelegate, setSelectedDelegate] = useState<DelegateInfo | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [regModalOpen, setRegModalOpen] = useState(false);
 
   const handleSelect = (delegate: DelegateInfo) => {
     setSelectedDelegate(delegate);
@@ -152,6 +159,9 @@ export default function DelegatesPage() {
     <div className="space-y-[var(--space-6)]">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Delegates</h1>
+        {address && !isRegistered && (
+          <Button onClick={() => setRegModalOpen(true)}>Become a Delegate</Button>
+        )}
       </div>
 
       {/* Current delegation status */}
@@ -199,6 +209,10 @@ export default function DelegatesPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         delegate={selectedDelegate}
+      />
+      <DelegateRegistrationModal
+        open={regModalOpen}
+        onClose={() => setRegModalOpen(false)}
       />
     </div>
   );

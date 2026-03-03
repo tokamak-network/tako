@@ -8,7 +8,9 @@ import type {
   Proposal,
   ProposalListItem,
   ProposalStatus,
+  ProposalCalldata,
   DelegateInfo,
+  DelegateVoteRecord,
   UserStatus,
   DAOParameters,
   DashboardMetrics,
@@ -28,6 +30,7 @@ import {
   useDelegate as useOnChainDelegate,
   useUndelegate as useOnChainUndelegate,
 } from "@/hooks/contracts";
+import { useDelegateVotingHistory } from "@/hooks/contracts/useDelegateVotingHistory";
 import { parseUnits } from "viem";
 
 // --- Standalone hooks implementing GovernanceDataProvider interface ---
@@ -164,6 +167,18 @@ function useOnChainDelegation() {
   return { delegate, undelegate, isLoading: delegateLoading || undelegateLoading };
 }
 
+function useOnChainProposalCalldata(_id: string): QueryResult<ProposalCalldata> {
+  // ProposalCreated event contains targets/values/calldatas, but parsing logs for
+  // a single proposal is expensive. For now, return empty — the AI decode_calldata
+  // tool is the primary way users see calldata.
+  return { data: undefined, isLoading: false, isError: false, error: null };
+}
+
+function useOnChainDelegateVotes(address: string): QueryResult<DelegateVoteRecord[]> {
+  const { votes, isLoading, isError, error } = useDelegateVotingHistory(address);
+  return { data: votes.length > 0 ? votes : undefined, isLoading, isError, error };
+}
+
 // --- Provider ---
 
 export function OnChainGovernanceProvider({ children }: { children: React.ReactNode }) {
@@ -180,6 +195,8 @@ export function OnChainGovernanceProvider({ children }: { children: React.ReactN
     useDashboardMetrics: useOnChainDashboardMetrics,
     useCastVote: useOnChainCastVoteHook,
     useDelegation: useOnChainDelegation,
+    useProposalCalldata: useOnChainProposalCalldata,
+    useDelegateVotes: useOnChainDelegateVotes,
   }));
 
   return (

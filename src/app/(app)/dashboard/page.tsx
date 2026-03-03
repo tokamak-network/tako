@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useGovernance } from "@/providers/governance/GovernanceProvider";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { StatusBadge, GovernanceSystemBadge } from "@/components/ui/badge";
+import { Badge, StatusBadge, GovernanceSystemBadge } from "@/components/ui/badge";
 import { VotingProgress } from "@/components/ui/progress";
 import { AddressAvatar } from "@/components/ui/avatar";
-import { formatNumber, formatAddress } from "@/lib/utils";
+import { formatNumber, formatAddress, formatDate } from "@/lib/utils";
 import { CharacterHero } from "@/components/dashboard/CharacterHero";
+import { useSecurityCouncilMembers, useSecurityCouncilThreshold, usePendingActions } from "@/hooks/contracts/useSecurityCouncil";
+import { useForumAgendas } from "@/hooks/useForumAgenda";
 
 function MetricsGrid() {
   const { useDashboardMetrics } = useGovernance();
@@ -178,6 +180,119 @@ function MyStatus() {
   );
 }
 
+function SecurityCouncilStatus() {
+  const { members, count, isLoading: membersLoading } = useSecurityCouncilMembers();
+  const { data: threshold, isLoading: thresholdLoading } = useSecurityCouncilThreshold();
+  const { actions, count: pendingCount, isLoading: actionsLoading } = usePendingActions();
+
+  const isLoading = membersLoading || thresholdLoading || actionsLoading;
+  const activePending = actions.filter((a) => !a.executed && !a.canceled);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Security Council</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-8 bg-[var(--bg-secondary)] rounded animate-pulse-soft" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-[var(--text-tertiary)]">Members</span>
+              <span className="text-[var(--text-primary)] font-medium">{count}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-[var(--text-tertiary)]">Threshold</span>
+              <span className="text-[var(--text-primary)] font-medium">{threshold ?? "-"} / {count}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-[var(--text-tertiary)]">Pending Actions</span>
+              <span className="text-[var(--text-primary)] font-medium">{activePending.length}</span>
+            </div>
+            {activePending.length > 0 && (
+              <Link
+                href="/security-council"
+                className="block text-xs text-[var(--text-brand)] hover:underline mt-1"
+              >
+                View pending actions &rarr;
+              </Link>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecentForumActivity() {
+  const { data, isLoading } = useForumAgendas({ limit: 5, sort: "newest" });
+
+  const STATUS_VARIANT: Record<string, "primary" | "success" | "error" | "warning" | "outline"> = {
+    draft: "outline",
+    rfc: "primary",
+    snapshot: "warning",
+    review: "warning",
+    onchain: "primary",
+    executed: "success",
+    rejected: "error",
+    withdrawn: "outline",
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Recent Forum Activity</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 bg-[var(--bg-secondary)] rounded-lg animate-pulse-soft" />
+            ))}
+          </div>
+        ) : data && data.agendas.length > 0 ? (
+          <div className="space-y-3">
+            {data.agendas.map((agenda) => (
+              <Link
+                key={agenda.id}
+                href={`/forum/${agenda.id}`}
+                className="block p-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors"
+              >
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-xs text-[var(--text-tertiary)]">{agenda.tipNumber}</span>
+                  <Badge variant={STATUS_VARIANT[agenda.status] ?? "outline"} size="sm">
+                    {agenda.status}
+                  </Badge>
+                </div>
+                <p className="text-sm font-medium text-[var(--text-primary)] truncate">{agenda.title}</p>
+                <div className="flex items-center gap-3 mt-1 text-xs text-[var(--text-tertiary)]">
+                  <span>{formatDate(new Date(agenda.createdAt).getTime())}</span>
+                  <span>{agenda.commentCount} comments</span>
+                </div>
+              </Link>
+            ))}
+            <Link
+              href="/forum"
+              className="block text-xs text-[var(--text-brand)] hover:underline text-center pt-1"
+            >
+              View all forum agendas &rarr;
+            </Link>
+          </div>
+        ) : (
+          <p className="text-sm text-[var(--text-tertiary)] py-4 text-center">
+            No forum activity yet
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DashboardPage() {
   return (
     <div className="space-y-[var(--space-6)]">
@@ -189,6 +304,10 @@ export default function DashboardPage() {
           <MyStatus />
           <TopDelegates />
         </div>
+      </div>
+      <div className="grid gap-[var(--space-6)] lg:grid-cols-2">
+        <RecentForumActivity />
+        <SecurityCouncilStatus />
       </div>
     </div>
   );

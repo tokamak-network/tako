@@ -8,9 +8,72 @@ import {
   useWaitForTransactionReceipt,
   useAccount,
 } from "wagmi";
-import { DELEGATE_REGISTRY_ABI } from "../../../shared/abi";
-import { VTON_ABI } from "../../../shared/abi";
+import { DELEGATE_REGISTRY_ABI, VTON_ABI } from "../../../shared/abi";
 import { useContracts, formatUnits18 } from "./helpers";
+
+/**
+ * Hook to get total vTON delegated across the system.
+ */
+export function useTotalDelegated() {
+  const { addresses, isDeployed } = useContracts();
+
+  const result = useReadContract({
+    address: addresses.delegateRegistry as `0x${string}`,
+    abi: DELEGATE_REGISTRY_ABI,
+    functionName: "totalDelegated",
+    query: { enabled: isDeployed },
+  });
+
+  return {
+    data: result.data != null ? formatUnits18(result.data as bigint) : undefined,
+    isLoading: isDeployed ? result.isLoading : false,
+  };
+}
+
+/**
+ * Hook to check if the connected user is a registered delegate.
+ */
+export function useIsRegisteredDelegate(address?: string) {
+  const { addresses, isDeployed } = useContracts();
+  const { address: connectedAddress } = useAccount();
+  const account = address ?? connectedAddress;
+
+  const result = useReadContract({
+    address: addresses.delegateRegistry as `0x${string}`,
+    abi: DELEGATE_REGISTRY_ABI,
+    functionName: "isRegisteredDelegate",
+    args: account ? [account as `0x${string}`] : undefined,
+    query: { enabled: isDeployed && !!account },
+  });
+
+  return {
+    data: (result.data as boolean) ?? false,
+    isLoading: isDeployed ? result.isLoading : false,
+  };
+}
+
+/**
+ * Hook to register as a delegate.
+ */
+export function useRegisterDelegate() {
+  const { addresses, isDeployed } = useContracts();
+
+  const { data: hash, isPending, writeContract, error, reset } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+
+  const register = (profile: string, votingPhilosophy: string, interests: string) => {
+    if (!isDeployed) throw new Error("Contracts not deployed");
+    writeContract({
+      address: addresses.delegateRegistry as `0x${string}`,
+      abi: DELEGATE_REGISTRY_ABI,
+      functionName: "registerDelegate",
+      args: [profile, votingPhilosophy, interests],
+    });
+  };
+
+  return { register, hash, isPending, isConfirming, isConfirmed, error, reset, isLoading: isPending || isConfirming };
+}
 
 /**
  * Hook to get all registered delegate addresses.
