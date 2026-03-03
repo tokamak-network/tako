@@ -1,0 +1,255 @@
+{
+  "$schema": "./authority-map.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2026-03-03",
+  "migrationPhase": "pre-migration",
+  "description": "Single source of truth for contract authority. Tracks which governance system (v1 DAOCommittee or v2 Timelock) controls each contract. Updated after each migration agenda executes.",
+
+  "governanceSystems": {
+    "v1": {
+      "name": "DAOCommittee (v1)",
+      "executor": "0xDD9f0cCc044B0781289Ee318e5971b0139602C26",
+      "executorName": "DAOCommitteeProxy",
+      "mechanism": "Committee vote (3 members, 2/3 quorum)",
+      "status": "active"
+    },
+    "v2": {
+      "name": "DAOGovernor (v2)",
+      "executor": "0x0000000000000000000000000000000000000000",
+      "executorName": "Timelock (not yet deployed on mainnet)",
+      "mechanism": "Token vote (vTON, 4% quorum, >50% pass)",
+      "status": "pending_deployment"
+    }
+  },
+
+  "contracts": {
+    "DAOCommitteeProxy": {
+      "address": "0xDD9f0cCc044B0781289Ee318e5971b0139602C26",
+      "category": "governance",
+      "authority": "v1",
+      "role": "Supreme authority — executes agendas, controls all v1 contracts",
+      "proxyType": "ProxyStorage2",
+      "implementations": {
+        "slot0": { "address": "0x9050Af1638f379A018737880aD946CdDA9101A25", "purpose": "Core: createCandidate, castVote, executeAgenda" },
+        "slot1": { "address": "0xcb9859Dc0fBECa68eFFf2bce289150513fdF7D92", "purpose": "Admin: setSeigManager, setDaoVault, daoExecuteTransaction" }
+      },
+      "adminOf": [
+        "SeigManagerProxy",
+        "DepositManagerProxy",
+        "Layer2RegistryProxy",
+        "CandidateFactoryProxy",
+        "CandidateAddOnFactoryProxy",
+        "Layer2ManagerProxy",
+        "L1BridgeRegistryProxy"
+      ],
+      "ownerOf": [
+        "DAOAgendaManager",
+        "DAOVault"
+      ]
+    },
+
+    "DAOAgendaManager": {
+      "address": "0xcD4421d082752f363E1687544a09d5112cD4f484",
+      "category": "governance",
+      "authority": "v1",
+      "role": "Stores agenda data, voting records, proposal lifecycle",
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "owner"
+    },
+
+    "DAOVault": {
+      "address": "0x2520CD65BAa2cEEe9E6Ad6EBD3F45490C42dd303",
+      "category": "governance",
+      "authority": "v1",
+      "role": "Treasury — holds TON/WTON/ERC20 for DAO operations",
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "owner"
+    },
+
+    "TON": {
+      "address": "0x2be5e8c109e2197D077D13A82dAead6a9b3433C5",
+      "category": "token",
+      "authority": "none",
+      "role": "Governance + economic token (ERC20, non-upgradeable)",
+      "notes": "No admin/owner. Minting controlled by WTON swap mechanism."
+    },
+
+    "WTON": {
+      "address": "0xc4A11aaf6ea915Ed7Ac194161d2fC9384F15bff2",
+      "category": "token",
+      "authority": "v1",
+      "role": "Wrapped TON for staking (ERC20, non-upgradeable)",
+      "notes": "SeigManagerProxy is minter. seigManager callback points to SeigManagerV0 (0x710936500aC566Dfc2E6c9a4397C617E5BaCdc39)"
+    },
+
+    "StakedWTON": {
+      "address": "0x47e264ea9b229368aa90c331D3f4CBe0b4c0f01d",
+      "category": "token",
+      "authority": "v1",
+      "role": "Total staked WTON tracking token (tot)",
+      "notes": "Managed by SeigManagerProxy"
+    },
+
+    "SeigManagerProxy": {
+      "address": "0x0b55a0f463b6defb81c6063973763951712d0e5f",
+      "category": "staking",
+      "authority": "v1",
+      "role": "Core staking engine — seigniorage distribution, commission rates",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0xb1958719b3Af9B4d85D93EFC5e317C97cCe9aBc4", "purpose": "SeigManagerV1_2 — default implementation" },
+        "selectorRouted": { "address": "0xce18C6F84F10881eA47A43AF7311A29bb116F628", "purpose": "SeigManagerV1_3 — L2 selector routing" }
+      },
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "admin",
+      "references": {
+        "ton": "0x2be5e8c109e2197D077D13A82dAead6a9b3433C5",
+        "wton": "0xc4A11aaf6ea915Ed7Ac194161d2fC9384F15bff2",
+        "registry": "Layer2RegistryProxy",
+        "depositManager": "DepositManagerProxy",
+        "factory": "CoinageFactory",
+        "dao": "DAOVault",
+        "powerton": "PowerTONSwapperProxy",
+        "layer2Manager": "Layer2ManagerProxy",
+        "l1BridgeRegistry": "L1BridgeRegistryProxy"
+      }
+    },
+
+    "DepositManagerProxy": {
+      "address": "0x0b58ca72b12f01fc05f8f252e226f3e2089bd00e",
+      "category": "staking",
+      "authority": "v1",
+      "role": "Manages TON/WTON deposits and withdrawals for staking",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0x76c01207959df1242c2824b4445cde48eb55d2f1", "purpose": "DepositManager implementation" }
+      },
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "admin"
+    },
+
+    "Layer2RegistryProxy": {
+      "address": "0x7846c2248a7b4de77e9c2bae7fbb93bfc286837b",
+      "category": "staking",
+      "authority": "v1",
+      "role": "Registry of approved Layer2 operators",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0x296ef64487ecfddcdd03eab35c81c9262dab88ba", "purpose": "Layer2Registry implementation" }
+      },
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "admin"
+    },
+
+    "CoinageFactory": {
+      "address": "0xe8fAe91B80dd515c3D8B9FC02CB5B2ecFDDABf43",
+      "category": "staking",
+      "authority": "v1",
+      "role": "Creates AutoRefactorCoinage instances for each Layer2",
+      "notes": "Referenced by SeigManagerProxy"
+    },
+
+    "PowerTONSwapperProxy": {
+      "address": "0x970298189050aBd4dc4F119ccae14ee145ad9371",
+      "category": "staking",
+      "authority": "v1",
+      "role": "PowerTON rewards distribution",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0x0AA0191e9cc7BE9B7228D4d3E3Dd65749C93551F", "purpose": "PowerTONUpgrade implementation" }
+      },
+      "notes": "Admin unclear — implementation2() reverts"
+    },
+
+    "CandidateFactoryProxy": {
+      "address": "0x9fc7100a16407ee24a79c834a56e6eca555a5d7c",
+      "category": "governance",
+      "authority": "v1",
+      "role": "Creates candidate contracts for committee member elections",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0xc5eb1c5ce7196bdb49ea7500ca18a1b9f1fa3ffb", "purpose": "CandidateFactory implementation" }
+      },
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "admin"
+    },
+
+    "CandidateAddOnFactoryProxy": {
+      "address": "0xFA8ce5caF456115E72B96E5074769b8f66AA5861",
+      "category": "governance",
+      "authority": "v1",
+      "role": "Extended candidate functionality factory",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0x557E24b5CbFbDA3e5aC1bD01F38EcDe865791Bc5", "purpose": "CandidateAddOnFactory implementation" }
+      },
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "admin"
+    },
+
+    "Layer2ManagerProxy": {
+      "address": "0xD6Bf6B2b7553c8064Ba763AD6989829060FdFC1D",
+      "category": "operator",
+      "authority": "v1",
+      "role": "Manages Layer2 operator lifecycle and operations",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0x2EB7f500125f11544392B83B87cDEb9456f3509f", "purpose": "Layer2ManagerV1_1 implementation" }
+      },
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "admin"
+    },
+
+    "L1BridgeRegistryProxy": {
+      "address": "0x39d43281A4A5e922AB0DCf89825D73273D8C5BA4",
+      "category": "operator",
+      "authority": "v1",
+      "role": "Registry of L1-side bridge contracts for Layer2 operators",
+      "proxyType": "ProxyStorage",
+      "implementations": {
+        "default": { "address": "0x259Ac335EB42d345A61bE48104eC0Ec20b283F14", "purpose": "L1BridgeRegistryV1_1 implementation" }
+      },
+      "controlledBy": "DAOCommitteeProxy",
+      "controlType": "admin"
+    },
+
+    "OperatorManagerFactory": {
+      "address": "0xAf86b21edDdC78ea27E23A7F2151d60d4e069450",
+      "category": "operator",
+      "authority": "v1",
+      "role": "Creates operator manager instances (ERC1967 proxy pattern)",
+      "proxyType": "ERC1967"
+    },
+
+    "L1BridgeRegistryProxy_Legacy": {
+      "address": "0x17Fa32DFf4c26cf0AC65Ff6700B57a4826513Fa0",
+      "category": "legacy",
+      "authority": "v1",
+      "role": "Legacy L1 bridge registry (Agenda 13 target, superseded)",
+      "notes": "Older implementation 0x70aF..., replaced by 0x39d4..."
+    },
+
+    "SwapProxy": {
+      "address": "0x30e65B3A6e6868F044944Aa0e9C5d52F8dcb138d",
+      "category": "legacy",
+      "authority": "v1",
+      "role": "Callback proxy (minimal, purpose unclear)",
+      "notes": "No verified source code"
+    }
+  },
+
+  "registeredOperators": [
+    { "name": "tokamak1", "address": "0xf3B17FDB808c7d0Df9ACd24dA34700ce069007DF" },
+    { "name": "DXM Corp", "address": "0x44e3605d0ed58FD125E9C47D1bf25a4406c13b57" },
+    { "name": "DSRV", "address": "0x2B67D8D4E61b68744885E243EfAF988f1Fc66E2D" },
+    { "name": "Talken", "address": "0x36101b31e74c5E8f9a9cec378407Bbb776287761" },
+    { "name": "staked", "address": "0x2c25A6be0e6f9017b5bf77879c487eed466F2194" },
+    { "name": "level", "address": "0x0F42D1C40b95DF7A1478639918fc358B4aF5298D" },
+    { "name": "decipher", "address": "0xbc602C1D9f3aE99dB4e9fD3662CE3D02e593ec5d" },
+    { "name": "DeSpread", "address": "0xC42cCb12515b52B59c02eEc303c887C8658f5854" },
+    { "name": "Danal Fintech", "address": "0xf3CF23D896Ba09d8EcdcD4655d918f71925E3FE5" },
+    { "name": "Hammer DAO", "address": "0x06D34f65869Ec94B3BA8c0E08BCEb532f65005E2" }
+  ],
+
+  "migrationLog": []
+}
