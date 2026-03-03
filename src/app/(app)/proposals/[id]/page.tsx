@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Modal, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/input";
 import { AddressAvatar } from "@/components/ui/avatar";
+import { ProposalAnalysisPanel } from "@/components/proposals/ProposalAnalysisPanel";
+import { useCharacter } from "@/providers/character/CharacterProvider";
+import { useChat } from "@/providers/chat/context";
 import { formatAddress, formatDate, formatNumber } from "@/lib/utils";
 import { VoteType } from "../../../../../shared/types";
 
@@ -90,6 +93,22 @@ function VotingModal({
   );
 }
 
+function DiscussButton({ proposalTitle }: { proposalTitle: string }) {
+  const { openChat } = useCharacter();
+  const { sendMessage } = useChat();
+
+  const handleDiscuss = () => {
+    openChat();
+    sendMessage(`What does this proposal do and is it safe? "${proposalTitle}"`);
+  };
+
+  return (
+    <Button variant="secondary" onClick={handleDiscuss}>
+      Discuss with AI
+    </Button>
+  );
+}
+
 export default function ProposalDetailPage() {
   const params = useParams();
   const id = params.id as string;
@@ -131,9 +150,12 @@ export default function ProposalDetailPage() {
             </span>
           </div>
         </div>
-        {proposal.status === "active" && (
-          <Button onClick={() => setVotingOpen(true)}>Vote</Button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          <DiscussButton proposalTitle={proposal.title} />
+          {proposal.status === "active" && (
+            <Button onClick={() => setVotingOpen(true)}>Vote</Button>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-[var(--space-6)] lg:grid-cols-3">
@@ -204,6 +226,9 @@ export default function ProposalDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* AI Analysis */}
+          <ProposalAnalysisPanel proposal={proposal} />
         </div>
       </div>
 

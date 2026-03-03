@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useCharacter } from "@/providers/character/CharacterProvider";
 import { useChat } from "@/providers/chat/context";
@@ -8,10 +9,22 @@ import { inferMood } from "@/lib/mood";
 import type { MessagePart } from "../../../shared/agent-types";
 import { MoodImage } from "./MoodImage";
 
+const MODE_LABELS: Record<string, string> = {
+  chat: "Chat",
+  analyze_proposal: "Proposal Analysis",
+};
+
 export function ChatWindow() {
   const { mood, isChatOpen, setMood } = useCharacter();
-  const { messages, input, setInput, sendMessage, isLoading } = useChat();
+  const { messages, input, setInput, sendMessage, isLoading, mode, setMode } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  // Auto-switch mode based on route
+  useEffect(() => {
+    const isProposalDetail = /^\/proposals\/[^/]+$/.test(pathname);
+    setMode(isProposalDetail ? "analyze_proposal" : "chat");
+  }, [pathname, setMode]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -56,10 +69,15 @@ export function ChatWindow() {
       {/* Character header */}
       <div className="relative h-32 flex items-center justify-center overflow-hidden rounded-t-[var(--radius-2xl)] bg-[var(--bg-secondary)]">
         <MoodImage mood={mood} size={96} />
-        <div className="absolute bottom-2 left-4">
+        <div className="absolute bottom-2 left-4 flex items-center gap-1.5">
           <span className="text-xs font-medium text-[var(--text-tertiary)] bg-[var(--bg-primary)] px-2 py-0.5 rounded-full">
             {mood}
           </span>
+          {mode !== "chat" && (
+            <span className="text-xs font-medium text-[var(--color-primary-400)] bg-[var(--color-primary-500)]/10 px-2 py-0.5 rounded-full">
+              {MODE_LABELS[mode] || mode}
+            </span>
+          )}
         </div>
       </div>
 
@@ -94,7 +112,7 @@ export function ChatWindow() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about governance..."
+            placeholder={mode === "analyze_proposal" ? "Ask about this proposal..." : "Ask about governance..."}
             disabled={isLoading}
             className={cn(
               "flex-1 h-9 px-3 text-sm",
