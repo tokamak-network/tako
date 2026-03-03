@@ -2,8 +2,8 @@
 
 ## Current Status
 - **Last updated**: 2026-03-03
-- **Current phase**: Phase A complete — UI with dummy data fully functional
-- **Next task**: Phase B (P1-4 wagmi + viem, P2-1 contract hooks)
+- **Current phase**: Phase B — On-chain integration
+- **Next task**: P4-1 (useAgentChat hook)
 - **Blockers**: None
 
 ## Completed
@@ -105,6 +105,30 @@
   - src/app/(app)/delegates/page.tsx
 - **Verification**: npm run build 성공, npm run dev로 모든 페이지 200 OK 확인
 
+### P1-4. wagmi + viem + Reown AppKit 설정 ✅
+- **Date**: 2026-03-03
+- **What was done**:
+  - wagmi, viem, @reown/appkit, @reown/appkit-adapter-wagmi, @tanstack/react-query 설치
+  - wagmi 설정 (sepolia 기본 + mainnet, Alchemy 선택적 transport, SSR cookieStorage)
+  - Web3Provider (createAppKit 모듈 레벨 초기화, WagmiProvider > QueryClientProvider > WalletConnectionProvider)
+  - useWalletConnection hook (isReady/isConnected/address 상태, 미지원 체인 sepolia 자동 전환)
+  - 루트 레이아웃에 Web3Provider 래핑, 앱 네비게이션의 하드코딩 주소 버튼 → `<appkit-button />` 교체
+  - appkit-button JSX 타입 선언 추가
+- **Key decisions**:
+  - dao-v2에서 sandbox chain/localhost/custom transport 전부 제거 — sepolia + mainnet만 지원
+  - Reown projectId는 dao-v2와 동일 사용 (ed9db8435ea432ec164cf02c06c0b969)
+  - 지갑 버튼은 Reown의 `<appkit-button />` 웹 컴포넌트 사용 (dao-v2의 CustomConnectButton 대신 심플하게)
+  - Web3Provider를 루트 레이아웃에 배치 (모든 페이지에서 wagmi/react-query 사용 가능)
+  - 미지원 체인 연결 시 sepolia + mainnet(1)만 허용, 나머지는 sepolia로 자동 전환
+- **Files created/modified**:
+  - src/config/wagmi.ts (새로 생성)
+  - src/providers/Web3Provider.tsx (새로 생성)
+  - src/hooks/useWalletConnection.tsx (새로 생성)
+  - src/types/appkit.d.ts (새로 생성 — JSX 타입 선언)
+  - src/app/layout.tsx (Web3Provider 래핑 추가)
+  - src/app/(app)/layout.tsx (Button import 제거, appkit-button 교체)
+- **Verification**: npm run build 성공
+
 ### 캐릭터 중심 대시보드 리디자인 ✅
 - **Date**: 2026-03-03
 - **What was done**:
@@ -122,11 +146,42 @@
   - src/app/(app)/dashboard/page.tsx (CharacterHero import + h1→CharacterHero 교체)
 - **Verification**: npm run build 성공
 
+### P2-1. 컨트랙트 hooks 래핑 ✅
+- **Date**: 2026-03-03
+- **What was done**:
+  - shared/abi/ — 4개 ABI 파일 (DAOGovernor, DelegateRegistry, vTON, Timelock) + index.ts re-export
+  - shared/addresses.ts — Sepolia + Mainnet(placeholder) 주소, getContractAddresses/areContractsDeployed/getDeploymentBlock 함수
+  - src/hooks/contracts/helpers.ts — useContracts hook, formatUnits18, blockToTimestamp, extractTitle
+  - src/hooks/contracts/useVTON.ts — useTotalSupply, useMaxSupply, useCurrentEpoch, useVTONBalance, useVotingPower
+  - src/hooks/contracts/useDAOGovernor.ts — useAllProposalIds, useProposal, useProposals, useGovernanceParams, useHasVoted, useCastVote
+  - src/hooks/contracts/useDelegateRegistry.ts — useAllDelegates, useDelegateInfo, useDelegates, useMyDelegations, useDelegate, useUndelegate
+  - src/hooks/contracts/useTimelock.ts — useTimelockDelay
+  - GovernanceContext를 context.ts로 분리 (두 provider가 공유)
+  - OnChainGovernanceProvider — 동일한 GovernanceDataProvider 인터페이스를 온체인 hooks로 구현
+  - AutoGovernanceProvider — 지갑 연결 여부에 따라 OnChain/Dummy provider 자동 전환
+  - layout.tsx에서 GovernanceProvider → AutoGovernanceProvider 교체
+- **Key decisions**:
+  - Provider Swap 패턴 유지 — 페이지 코드 변경 없이 더미 → 온체인 전환
+  - bigint → number 변환은 hooks 레벨에서 처리 (formatUnits18)
+  - block number → timestamp 변환은 현재 블록 기준 추정 (BLOCK_TIME_SECONDS = 12)
+  - GovernanceDataProvider의 hook 함수들을 모듈 레벨 함수로 구현하여 참조 안정성 확보
+  - useState(() => ...) 패턴으로 provider 객체를 한 번만 생성 → context value stable
+  - shared/ 의 ABI는 dao-v2 contracts.ts에서 MVP에 필요한 함수만 추출 (read + write + events)
+  - sandbox/localhost 체인 제거 — sepolia + mainnet만 지원
+- **Files created/modified**:
+  - shared/abi/DAOGovernor.ts, DelegateRegistry.ts, vTON.ts, Timelock.ts, index.ts (새로 생성)
+  - shared/addresses.ts (새로 생성)
+  - src/hooks/contracts/helpers.ts, useVTON.ts, useDAOGovernor.ts, useDelegateRegistry.ts, useTimelock.ts, index.ts (새로 생성)
+  - src/providers/governance/context.ts (새로 생성)
+  - src/providers/governance/OnChainGovernanceProvider.tsx (새로 생성)
+  - src/providers/governance/AutoGovernanceProvider.tsx (새로 생성)
+  - src/providers/governance/GovernanceProvider.tsx (context import 변경, useGovernance re-export)
+  - src/app/(app)/layout.tsx (GovernanceProvider → AutoGovernanceProvider 교체)
+- **Verification**: npm run build 성공, 모든 페이지 정상 생성 확인
+
 ## In Progress
 
-### P1-4. wagmi + viem + Reown AppKit 설정
-- **Started**: 2026-03-03
-- **What**: wagmi + viem + Reown AppKit 인프라 설정, Web3Provider, useWalletConnection hook, 네비게이션 지갑 버튼 교체
+(없음)
 
 ## Blocked
 

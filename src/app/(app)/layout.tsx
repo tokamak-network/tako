@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { CharacterProvider } from "@/providers/character/CharacterProvider";
-import { GovernanceProvider } from "@/providers/governance/GovernanceProvider";
+import { AutoGovernanceProvider } from "@/providers/governance/AutoGovernanceProvider";
 import { ChatProvider } from "@/providers/chat/ChatProvider";
 import { ChatBubble } from "@/components/character/ChatBubble";
 import { ChatWindow } from "@/components/character/ChatWindow";
@@ -52,7 +52,7 @@ function AppNavigation() {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <CharacterProvider>
-      <GovernanceProvider>
+      <AutoGovernanceProvider>
         <ChatProvider>
           <div className="min-h-screen bg-[var(--bg-primary)]">
             <AppNavigation />
@@ -63,7 +63,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <ChatWindow />
           </div>
         </ChatProvider>
-      </GovernanceProvider>
+      </AutoGovernanceProvider>
     </CharacterProvider>
   );
 }

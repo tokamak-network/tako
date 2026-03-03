@@ -1,7 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import type { GovernanceDataProvider, QueryResult } from "./types";
+import { GovernanceContext, useGovernance } from "./context";
+
+// Re-export so existing imports don't break
+export { useGovernance };
 import type {
   Proposal,
   ProposalListItem,
@@ -44,15 +48,6 @@ function useDummyQuery<T>(data: T, delay = 800): QueryResult<T> {
     isError: false,
     error: null,
   };
-}
-
-// --- Context ---
-const GovernanceContext = createContext<GovernanceDataProvider | null>(null);
-
-export function useGovernance() {
-  const ctx = useContext(GovernanceContext);
-  if (!ctx) throw new Error("useGovernance must be used within GovernanceProvider");
-  return ctx;
 }
 
 // --- Provider ---

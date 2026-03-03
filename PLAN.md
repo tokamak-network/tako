@@ -4,10 +4,10 @@
 - [x] P1-1. Next.js 15 프로젝트 초기화 (TypeScript, Tailwind CSS v4, App Router, 핵심 패키지)
 - [x] P1-2. shared/ 타입 + Provider 인터페이스 + 더미 데이터 + Provider 구현
 - [x] P1-3. 디자인 시스템 이식 (dao-v2 tokens + ui/ + toki 다크 테마)
-- [ ] P1-4. wagmi + viem + Reown AppKit 설정 (Phase B, Phase A에서는 건너뜀)
+- [x] P1-4. wagmi + viem + Reown AppKit 설정 (Phase B, Phase A에서는 건너뜀)
 
 ## Phase 2: Governance UI (더미 데이터로 동작)
-- [ ] P2-1. 컨트랙트 hooks 래핑 — P1-4 완료 후 (Phase B)
+- [x] P2-1. 컨트랙트 hooks 래핑 — P1-4 완료 후 (Phase B)
 - [x] P2-2. 대시보드 페이지 (/dashboard)
 - [x] P2-3. 안건 목록 페이지 (/proposals)
 - [x] P2-4. 안건 상세 + 투표 (/proposals/[id] + VotingModal)
