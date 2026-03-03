@@ -1,0 +1,417 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
+
+@import "tailwindcss";
+@import "../styles/design-tokens.css";
+
+/* ============================================
+   Tailwind v4 Theme Configuration
+   ============================================ */
+
+@theme inline {
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-600: var(--color-primary-600);
+  --color-primary-700: var(--color-primary-700);
+  --color-primary-800: var(--color-primary-800);
+  --color-primary-900: var(--color-primary-900);
+  --color-primary-950: var(--color-primary-950);
+
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --color-surface: var(--surface-primary);
+  --color-surface-elevated: var(--surface-secondary);
+  --color-border: var(--border-primary);
+
+  --font-sans: "DM Sans", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Source Code Pro", var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  border-color: var(--border-secondary);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "DM Sans", var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+::selection {
+  background: var(--color-primary-100);
+  color: var(--color-primary-900);
+}
+
+.dark ::selection,
+[data-theme="dark"] ::selection {
+  background: var(--color-primary-900);
+  color: var(--color-primary-100);
+}
+
+/* ============================================
+   Scrollbar
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-quaternary);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) var(--bg-secondary);
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+h1 { font-size: var(--font-size-4xl); }
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+h5 { font-size: var(--font-size-lg); }
+h6 { font-size: var(--font-size-base); }
+
+p {
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+small {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+code, pre, kbd, samp {
+  font-family: "Source Code Pro", var(--font-mono);
+}
+
+code {
+  padding: var(--space-0-5) var(--space-1-5);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: 0.875em;
+}
+
+pre {
+  padding: var(--space-4);
+  background: var(--surface-secondary);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+/* ============================================
+   Links
+   ============================================ */
+
+a:not([class]) {
+  color: var(--text-brand);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+a:not([class]):hover {
+  color: var(--color-primary-700);
+  text-decoration: underline;
+}
+
+.dark a:not([class]):hover,
+[data-theme="dark"] a:not([class]):hover {
+  color: var(--color-primary-300);
+}
+
+/* ============================================
+   Layout
+   ============================================ */
+
+.container {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .container { padding-inline: var(--space-6); }
+}
+
+@media (min-width: 1024px) {
+  .container { padding-inline: var(--space-8); }
+}
+
+.card-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* ============================================
+   Animations (dao-v2 + toki)
+   ============================================ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* toki-specific animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes drop-in {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: fade-in var(--duration-normal) var(--ease-out); }
+.animate-fade-up { animation: fade-up var(--duration-normal) var(--ease-out); }
+.animate-fade-down { animation: fade-down var(--duration-normal) var(--ease-out); }
+.animate-scale-in { animation: scale-in var(--duration-normal) var(--ease-out); }
+.animate-slide-in-right { animation: slide-in-right var(--duration-normal) var(--ease-out); }
+.animate-pulse-soft { animation: pulse-soft 2s var(--ease-in-out) infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+.animate-drop-in { animation: drop-in 0.3s var(--ease-out); }
+.animate-slide-up-fade { animation: slide-up-fade 0.2s var(--ease-out); }
+
+/* ============================================
+   Glass effect (toki-inspired)
+   ============================================ */
+
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass,
+[data-theme="dark"] .glass {
+  background: rgba(16, 24, 40, 0.8);
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.text-balance { text-wrap: balance; }
+.text-pretty { text-wrap: pretty; }
+
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   Proposal Prose
+   ============================================ */
+
+.proposal-prose {
+  --prose-body: var(--text-secondary);
+  --prose-headings: var(--text-primary);
+  --prose-links: var(--text-brand);
+  --prose-bold: var(--text-primary);
+  --prose-bullets: var(--color-primary-400);
+  --prose-quote-borders: var(--color-primary-300);
+  --prose-pre-bg: var(--bg-tertiary);
+  --prose-hr: var(--border-secondary);
+
+  color: var(--prose-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+}
+
+.proposal-prose h2,
+.proposal-prose h3,
+.proposal-prose h4 {
+  color: var(--prose-headings);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-4);
+  line-height: var(--line-height-tight);
+}
+
+.proposal-prose h2:first-child,
+.proposal-prose h3:first-child {
+  margin-top: 0;
+}
+
+.proposal-prose h2 {
+  font-size: var(--font-size-2xl);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.proposal-prose h3 { font-size: var(--font-size-xl); }
+.proposal-prose h4 { font-size: var(--font-size-lg); }
+
+.proposal-prose p {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.proposal-prose ul,
+.proposal-prose ol {
+  margin: var(--space-4) 0;
+  padding-left: var(--space-6);
+}
+
+.proposal-prose ul { list-style-type: disc; }
+.proposal-prose ol { list-style-type: decimal; }
+
+.proposal-prose li {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-2);
+}
+
+.proposal-prose li::marker {
+  color: var(--prose-bullets);
+}
+
+.proposal-prose strong {
+  color: var(--prose-bold);
+  font-weight: var(--font-weight-semibold);
+}
+
+.proposal-prose a {
+  color: var(--prose-links);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.proposal-prose blockquote {
+  margin: var(--space-6) 0;
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--prose-quote-borders);
+  font-style: italic;
+}
+
+.proposal-prose pre {
+  margin: var(--space-6) 0;
+  padding: var(--space-4);
+  background: var(--prose-pre-bg);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+.proposal-prose pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.proposal-prose hr {
+  margin: var(--space-8) 0;
+  border: 0;
+  border-top: 1px solid var(--prose-hr);
+}
