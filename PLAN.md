@@ -20,8 +20,8 @@
 - [x] P3-4. CharacterProvider (캐릭터 상태 관리)
 
 ## Phase 4: AI Agent Integration
-- [ ] P4-1. useAgentChat hook (dao-agent SSE 스트리밍 클라이언트)
-- [ ] P4-2. AI 대화 ↔ 캐릭터 mood 연결 (inferMood)
+- [x] P4-1. useAgentChat hook (dao-agent SSE 스트리밍 클라이언트)
+- [x] P4-2. AI 대화 ↔ 캐릭터 mood 연결 (inferMood)
 - [ ] P4-3. 안건 상세 페이지에 캐릭터 분석 패널 통합
 - [ ] P4-4. CHAT + ANALYZE_PROPOSAL 모드 연동
 

@@ -2,8 +2,8 @@
 
 ## Current Status
 - **Last updated**: 2026-03-03
-- **Current phase**: Phase B — On-chain integration
-- **Next task**: P4-1 (useAgentChat hook)
+- **Current phase**: Phase 4 — AI Agent Integration
+- **Next task**: P4-3 (안건 상세 페이지에 캐릭터 분석 패널 통합)
 - **Blockers**: None
 
 ## Completed
@@ -177,6 +177,55 @@
   - src/providers/governance/AutoGovernanceProvider.tsx (새로 생성)
   - src/providers/governance/GovernanceProvider.tsx (context import 변경, useGovernance re-export)
   - src/app/(app)/layout.tsx (GovernanceProvider → AutoGovernanceProvider 교체)
+- **Verification**: npm run build 성공, 모든 페이지 정상 생성 확인
+
+### P4-2. AI 대화 ↔ 캐릭터 mood 연결 (inferMood) ✅
+- **Date**: 2026-03-03
+- **What was done**:
+  - src/lib/mood.ts — inferMood 함수 추출 (키워드 패턴 매칭: thinking/explain/excited/welcome)
+  - CharacterProvider — 인라인 inferMoodFromContent 제거, mood.ts에서 import
+  - ChatWindow — useEffect로 mood 자동 동기화 (isLoading → thinking, 완료 → inferMood(lastAssistantContent))
+- **Key decisions**:
+  - mood 동기화를 ChatWindow에 배치 — 채팅창이 열려 있을 때만 mood 변경 (대시보드 CharacterHero의 인사말 mood와 충돌 방지)
+  - isLoading 기반 동기화로 dummy/agent 양쪽 provider 모두 호환
+  - 키워드 패턴 확장: problem/concern/issue (explain), awesome/perfect (excited), simulating/decoding/fetching (thinking)
+  - inferMood에서 thinking 패턴 우선순위 최고 — 분석 중 "risk" 등이 포함되어도 thinking 유지
+- **Files created/modified**:
+  - src/lib/mood.ts (새로 생성)
+  - src/providers/character/CharacterProvider.tsx (inferMood import)
+  - src/components/character/ChatWindow.tsx (mood sync useEffect 추가)
+- **Verification**: npm run build 성공
+
+### P4-1. useAgentChat hook (dao-agent SSE 스트리밍 클라이언트) ✅
+- **Date**: 2026-03-03
+- **What was done**:
+  - shared/agent-types.ts에 AgentChatRequest 인터페이스 추가
+  - ChatContext + useChat을 context.ts로 분리 (GovernanceContext와 동일 패턴)
+  - agent-client.ts — checkAgentHealth (3초 timeout) + streamChat (fetch + ReadableStream → AsyncGenerator<ChatSSEEvent>)
+  - useAgentChat hook — SSE 이벤트별 처리 (text_delta, tool_use, tool_result, thinking, done, error), AbortController 취소 지원
+  - AgentChatProvider — useAgentChat → ChatContext.Provider 연결
+  - AutoChatProvider — mount 시 health check, 에이전트 사용 가능 → Agent, 불가 → Dummy
+  - ChatWindow — parts 렌더링 추가 (text, tool_call 배지, thinking pulse), parts 없으면 기존 content 렌더링 (dummy 호환)
+  - layout.tsx에서 ChatProvider → AutoChatProvider 교체
+  - .env.local에 NEXT_PUBLIC_AGENT_URL=http://localhost:3333 설정
+- **Key decisions**:
+  - Provider Swap 패턴 유지 — AutoGovernanceProvider와 동일 구조 (health check → fallback)
+  - EventSource 대신 fetch + ReadableStream 사용 (POST 지원 필요)
+  - SSE 파싱은 `data:` 라인 기반 직접 파싱 (서드파티 라이브러리 없음)
+  - 스트리밍 중 새 메시지 전송 시 이전 AbortController.abort()로 정리
+  - tool 배지는 isRunning 상태에 따라 pulse 애니메이션 / 체크마크 표시
+  - Health check는 mount 시 1회만 실행 (checked 전/실패 시 dummy 즉시 렌더)
+- **Files created/modified**:
+  - shared/agent-types.ts (AgentChatRequest 추가)
+  - src/providers/chat/context.ts (새로 생성)
+  - src/providers/chat/ChatProvider.tsx (context import 변경)
+  - src/lib/agent-client.ts (새로 생성)
+  - src/hooks/useAgentChat.ts (새로 생성)
+  - src/providers/chat/AgentChatProvider.tsx (새로 생성)
+  - src/providers/chat/AutoChatProvider.tsx (새로 생성)
+  - src/app/(app)/layout.tsx (AutoChatProvider 교체)
+  - src/components/character/ChatWindow.tsx (parts 렌더링, context import)
+  - .env.local (새로 생성)
 - **Verification**: npm run build 성공, 모든 페이지 정상 생성 확인
 
 ## In Progress
