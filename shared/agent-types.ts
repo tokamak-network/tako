@@ -33,3 +33,9 @@ export interface ToolCall {
   isError?: boolean;
   isRunning: boolean;
 }
+
+export interface AgentChatRequest {
+  messages: { role: "user" | "assistant"; content: string }[];
+  mode?: AgentMode;
+  model?: string;
+}

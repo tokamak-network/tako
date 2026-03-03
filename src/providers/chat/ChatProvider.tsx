@@ -1,17 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useRef } from "react";
-import type { ChatContextValue } from "./types";
+import React, { useState, useCallback, useRef } from "react";
 import type { ChatMessage, AgentMode } from "../../../shared/agent-types";
 import { matchScript } from "@/data/dummy/chat-scripts";
+import { ChatContext, useChat } from "./context";
 
-const ChatContext = createContext<ChatContextValue | null>(null);
-
-export function useChat() {
-  const ctx = useContext(ChatContext);
-  if (!ctx) throw new Error("useChat must be used within ChatProvider");
-  return ctx;
-}
+export { useChat };
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([

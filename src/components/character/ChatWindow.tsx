@@ -3,19 +3,35 @@
 import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useCharacter } from "@/providers/character/CharacterProvider";
-import { useChat } from "@/providers/chat/ChatProvider";
+import { useChat } from "@/providers/chat/context";
+import { inferMood } from "@/lib/mood";
+import type { MessagePart } from "../../../shared/agent-types";
 import { MoodImage } from "./MoodImage";
 
 export function ChatWindow() {
-  const { mood, isChatOpen } = useCharacter();
+  const { mood, isChatOpen, setMood } = useCharacter();
   const { messages, input, setInput, sendMessage, isLoading } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Sync character mood with chat state
+  useEffect(() => {
+    if (isLoading) {
+      setMood("thinking");
+      return;
+    }
+    // When streaming completes, infer mood from last assistant message
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    if (lastAssistant?.content) {
+      setMood(inferMood(lastAssistant.content));
+    }
+  }, [isLoading, messages, setMood]);
 
   if (!isChatOpen) return null;
 
@@ -59,7 +75,11 @@ export function ChatWindow() {
                 : "mr-auto max-w-[90%] text-[var(--text-secondary)]"
             )}
           >
-            {msg.content}
+            {msg.role === "assistant" && msg.parts && msg.parts.length > 0 ? (
+              <AssistantParts parts={msg.parts} />
+            ) : (
+              msg.content
+            )}
             {msg.role === "assistant" && isLoading && i === messages.length - 1 && (
               <span className="animate-pulse text-[var(--color-primary-400)]"> |</span>
             )}
@@ -102,5 +122,53 @@ export function ChatWindow() {
         </div>
       </form>
     </div>
+  );
+}
+
+/** Renders structured message parts from the agent SSE stream */
+function AssistantParts({ parts }: { parts: MessagePart[] }) {
+  return (
+    <>
+      {parts.map((part, i) => {
+        switch (part.type) {
+          case "text":
+            return <span key={i}>{part.content}</span>;
+          case "tool_call":
+            return (
+              <span
+                key={i}
+                className={cn(
+                  "inline-flex items-center gap-1 px-1.5 py-0.5 my-0.5 rounded text-xs font-mono",
+                  part.toolCall?.isRunning
+                    ? "bg-[var(--color-primary-500)]/15 text-[var(--color-primary-400)]"
+                    : part.toolCall?.isError
+                      ? "bg-[var(--color-error)]/15 text-[var(--color-error)]"
+                      : "bg-[var(--color-success)]/15 text-[var(--color-success)]"
+                )}
+              >
+                {part.toolCall?.isRunning ? (
+                  <>
+                    <span className="animate-pulse">&#9679;</span>
+                    {part.toolCall.name}...
+                  </>
+                ) : (
+                  <>&#10003; {part.toolCall?.name}</>
+                )}
+              </span>
+            );
+          case "thinking":
+            return (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 text-xs text-[var(--text-tertiary)] animate-pulse"
+              >
+                Thinking...
+              </span>
+            );
+          default:
+            return null;
+        }
+      })}
+    </>
   );
 }
