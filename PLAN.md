@@ -22,8 +22,8 @@
 ## Phase 4: AI Agent Integration
 - [x] P4-1. useAgentChat hook (dao-agent SSE 스트리밍 클라이언트)
 - [x] P4-2. AI 대화 ↔ 캐릭터 mood 연결 (inferMood)
-- [ ] P4-3. 안건 상세 페이지에 캐릭터 분석 패널 통합
-- [ ] P4-4. CHAT + ANALYZE_PROPOSAL 모드 연동
+- [x] P4-3. 안건 상세 페이지에 캐릭터 분석 패널 통합
+- [x] P4-4. CHAT + ANALYZE_PROPOSAL 모드 연동
 
 ## Phase 5: Migration Knowledge
 - [ ] P5-1. authority-map.json 초기 버전 생성 (v1 47개 컨트랙트 매핑)

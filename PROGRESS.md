@@ -2,8 +2,8 @@
 
 ## Current Status
 - **Last updated**: 2026-03-03
-- **Current phase**: Phase 4 — AI Agent Integration
-- **Next task**: P4-3 (안건 상세 페이지에 캐릭터 분석 패널 통합)
+- **Current phase**: Phase 4 완료 → Phase 5 — Migration Knowledge
+- **Next task**: P5-1 (authority-map.json 초기 버전 생성)
 - **Blockers**: None
 
 ## Completed
@@ -178,6 +178,43 @@
   - src/providers/governance/GovernanceProvider.tsx (context import 변경, useGovernance re-export)
   - src/app/(app)/layout.tsx (GovernanceProvider → AutoGovernanceProvider 교체)
 - **Verification**: npm run build 성공, 모든 페이지 정상 생성 확인
+
+### P4-4. CHAT + ANALYZE_PROPOSAL 모드 연동 ✅
+- **Date**: 2026-03-03
+- **What was done**:
+  - ChatWindow에 route 기반 자동 모드 전환 — `/proposals/[id]` → analyze_proposal, 그 외 → chat
+  - ChatWindow 헤더에 모드 배지 표시 (analyze_proposal 모드일 때 "Proposal Analysis" 라벨)
+  - 입력창 placeholder 모드별 분기 ("Ask about this proposal..." / "Ask about governance...")
+  - 안건 상세 페이지에 "Discuss with AI" 버튼 — 클릭 시 채팅창 열기 + 프로포절 질문 자동 전송
+  - DiscussButton 별도 컴포넌트로 분리 (useCharacter + useChat 의존성 격리)
+- **Key decisions**:
+  - 모드 전환은 usePathname + useEffect로 자동 — 사용자가 수동 전환할 필요 없음
+  - 모드 변경 시 기존 메시지 히스토리 유지 — 이전 대화 맥락 보존
+  - "Discuss with AI" 버튼은 ProposalAnalysisPanel(독립 분석)과 별개 — 채팅창에서 대화형 분석
+  - 모드 배지는 chat(기본)일 때는 숨김 — 불필요한 UI 노이즈 방지
+- **Files created/modified**:
+  - src/components/character/ChatWindow.tsx (route 기반 모드 전환, 모드 배지, 동적 placeholder)
+  - src/app/(app)/proposals/[id]/page.tsx (DiscussButton 컴포넌트 + 헤더에 배치)
+- **Verification**: npm run build 성공
+
+### P4-3. 안건 상세 페이지에 캐릭터 분석 패널 통합 ✅
+- **Date**: 2026-03-03
+- **What was done**:
+  - ProposalAnalysisPanel 컴포넌트 — self-contained AI 분석 패널 (글로벌 채팅과 독립)
+  - streamChat 직접 사용 — 별도의 AbortController, 로컬 상태 관리
+  - mount 시 checkAgentHealth → 에이전트 미사용 시 패널 자체를 렌더링하지 않음
+  - "Analyze Proposal" 버튼 → analyze_proposal 모드로 SSE 스트리밍 요청
+  - 스트리밍 중 tool 배지 + thinking 애니메이션 표시, 완료 시 inferMood로 패널 내 mood 동기화
+  - 안건 상세 페이지 사이드바에 Timeline 카드 아래 배치
+- **Key decisions**:
+  - 글로벌 useChat() 대신 streamChat 직접 사용 — 채팅창과 독립적 분석 (동시 사용 가능)
+  - 에이전트 불가 시 null 반환 (패널 비표시) — dummy 모드에서 가짜 분석을 보여주지 않음
+  - AnalysisParts는 ChatWindow의 AssistantParts와 동일 패턴이지만 로컬 컴포넌트로 유지 (의존성 최소화)
+  - Re-analyze 버튼으로 재분석 가능
+- **Files created/modified**:
+  - src/components/proposals/ProposalAnalysisPanel.tsx (새로 생성)
+  - src/app/(app)/proposals/[id]/page.tsx (ProposalAnalysisPanel import + 사이드바에 추가)
+- **Verification**: npm run build 성공
 
 ### P4-2. AI 대화 ↔ 캐릭터 mood 연결 (inferMood) ✅
 - **Date**: 2026-03-03
